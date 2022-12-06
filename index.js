@@ -16,8 +16,13 @@ const SearchPokemon = async (url, value) => {
 	buttons.innerHTML = "";
 	try {
 		let array = [];
-		value = value.toLowerCase();
-		const response = await fetch(url + "/pokemon/" + value);
+		let response;
+		value = value.toLowerCase().trim();
+		if (value == "") {
+			response = await fetch(url + "/pokemon/?limit=10&offset=0");
+		} else {
+			response = await fetch(url + "/pokemon/" + value);
+		}
 		const results = await response.json();
 		if (value) {
 			array.push(results);
@@ -30,7 +35,7 @@ const SearchPokemon = async (url, value) => {
 		}
 	} catch (error) {
 		console.log(error);
-		Notfound();
+		ErrorMessage();
 	}
 };
 
@@ -79,16 +84,18 @@ const DataPokemons = async (data) => {
 	return pokemons;
 };
 
-const Notfound = () => {
-	pokemons_list.innerHTML = "<h1 class='notFound'> NOT FOUND </h1>";
+const ErrorMessage = (mensaje = "NOT FOUND") => {
+	pokemons_list.innerHTML = "<h1 class='notFound'>" + mensaje + "</h1>";
 	table.innerHTML = "";
 };
 
-const createTable = (pokemons) => {
+const createTable = (pokemons, favorito = false) => {
 	pokemons_list.innerHTML = "";
 	table.innerHTML = "";
-	console.table(pokemons);
-
+	//console.table(pokemons);
+	if (pokemons == 0) {
+		ErrorMessage("No hay pokemons favoritos");
+	}
 	/* ENCABEZADOS */
 	let tr = document.createElement("tr");
 
@@ -129,6 +136,9 @@ const createTable = (pokemons) => {
 		img = document.createElement("img");
 		img.src = "./img/estrellaVacia.png";
 		img.height = "50";
+		if (favorito) {
+			img.src = "./img/estrella.png";
+		}
 		img.addEventListener("click", (e) => {
 			console.log(img.src.includes("estrella.png"));
 			if (img.src.includes("estrella.png")) {
@@ -166,7 +176,7 @@ GetPokemons(API_URL).then((pokemons) => {
 buttons.addEventListener("click", (e) => {
 	if (e.target.classList.contains("btn")) {
 		let value = e.target.dataset.url;
-		console.log(value);
+		//console.log(value);
 		GetPokemons(value).then((pokemons) => {
 			createTable(pokemons);
 		});
@@ -176,7 +186,7 @@ buttons.addEventListener("click", (e) => {
 buscar.addEventListener("click", (e) => {
 	if (e.target.classList.contains("btnBuscar")) {
 		let txtBuscar = document.getElementById("txtBuscar");
-		console.log(txtBuscar.value);
+		//console.log(txtBuscar.value);
 		SearchPokemon(API_URL, txtBuscar.value);
 	}
 });
@@ -184,9 +194,8 @@ buscar.addEventListener("click", (e) => {
 fileInput.addEventListener("change", leerArchivo, false);
 
 btnMostrarFavoritos.addEventListener("click", (e) => {
-	console.log(favoritos);
+	//console.log(favoritos);
 	createTable(favoritos);
-	console.log(JSON.stringify(favoritos));
 });
 
 btnGuardarFavoritos.addEventListener(
@@ -226,11 +235,17 @@ function leerArchivo(e) {
 	lector.onload = function (e) {
 		let contenido = e.target.result;
 		//mostrarContenido(contenido);
-		let favoritosJSON = JSON.parse(contenido);
-		console.log(favoritosJSON);
-		createTable(favoritosJSON);
+		if (contenido.endsWith("}]")) {
+			let favoritosJSON = JSON.parse(contenido);
+			console.log(favoritosJSON);
+			favoritos = favoritos.concat(favoritosJSON);
+			createTable(favoritosJSON, true);
+		} else {
+			ErrorMessage("Archivo invalidado");
+		}
 	};
 	lector.readAsText(archivo);
+	fileInput.value = null;
 }
 
 function mostrarContenido(contenido) {
