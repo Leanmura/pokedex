@@ -1,3 +1,46 @@
+body {
+	background-color: rgb(184, 42, 42);
+	background-image: url("./img/581224.jpg");
+	color: aliceblue;
+}
+
+.container {
+	border: 2px solid black;
+	border-radius: 50px;
+	height: 100%;
+	width: 70%;
+	display: grid;
+	margin: 50px auto;
+	padding: 40px;
+	background-color: rgba(3, 1, 1, 0.616);
+}
+
+#title {
+	margin: auto;
+}
+
+#buscar {
+	justify-self: center;
+	margin: 20px 0px;
+}
+
+#txtBuscar {
+	margin: auto;
+	width: 500px;
+	height: 30px;
+}
+
+.btnBuscar {
+	margin: auto;
+	width: 100px;
+	height: 30px;
+}
+
+#pokemons_list {
+	height: 500px;
+	overflow-y: scroll;
+}
+
 .notFound {
 	color: rgb(255, 0, 0);
 }
